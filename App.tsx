@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Globe from './components/Globe';
 import InfoBox from './components/InfoBox';
+import LandingPage from './components/LandingPage';
+import MuteButton from './components/MuteButton';
+import { useAudioPlayer } from './hooks/useAudioPlayer';
 
 // Helper function to generate a new random signature hash
 const generateSignature = () => {
@@ -15,6 +18,20 @@ const generateSignature = () => {
 };
 
 const App: React.FC = () => {
+  // App state
+  const [showVisualization, setShowVisualization] = useState(false);
+  
+  // Audio setup - handle dynamic base path
+  const getAudioPath = () => {
+    // In development (localhost), Vite serves from root, in production from base path
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isDev ? '/audio/gpu.mp3' : '/AIthinkingMode_DataSculpture/audio/gpu.mp3';
+  };
+  
+  const audioPath = getAudioPath();
+  
+  const { play, toggleMute, isMuted, isLoaded } = useAudioPlayer(audioPath);
+  
   // State for dynamic values
   const [cycles, setCycles] = useState(3141592);
   const [synthesisMinutes, setSynthesisMinutes] = useState(7680);
@@ -77,6 +94,24 @@ const App: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // Handle entering visualization
+  const handleEnterVisualization = async () => {
+    setShowVisualization(true);
+    if (isLoaded) {
+      try {
+        await play();
+      } catch (error) {
+        console.warn('Audio autoplay blocked or failed:', error);
+      }
+    }
+  };
+
+  // Show landing page first
+  if (!showVisualization) {
+    return <LandingPage onEnterVisualization={handleEnterVisualization} />;
+  }
+
+  // Show main visualization
   return (
     <main className="w-screen h-screen bg-black text-white font-mono relative overflow-hidden select-none">
       <Globe />
@@ -136,10 +171,17 @@ const App: React.FC = () => {
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-sm tracking-wider">
           <p>~Shahnab~</p>
         </div>
-        <div className="absolute bottom-8 right-8 text-right text-sm tracking-wider">
+        <div className="absolute bottom-8 right-20 text-right text-sm tracking-wider">
           <p>HCMC, 22-10-2025</p>
         </div>
       </div>
+
+      {/* Mute Button */}
+      <MuteButton 
+        isMuted={isMuted} 
+        onToggleMute={toggleMute} 
+        isVisible={showVisualization} 
+      />
     </main>
   );
 };
