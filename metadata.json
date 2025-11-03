@@ -1,0 +1,5 @@
+{
+  "name": "AI Data Sculpture",
+  "description": "An interactive 3D data visualization inspired by Refik Anadol's 'Unsupervised'. It features a rotating, abstract data sculpture with a dynamic, paint-splattered appearance and internal particle structures.",
+  "requestFramePermissions": []
+}
